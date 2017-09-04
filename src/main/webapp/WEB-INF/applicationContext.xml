@@ -2,10 +2,13 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
        http://www.springframework.org/schema/context
-       http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+       http://www.springframework.org/schema/context/spring-context-3.0.xsd
+       http://www.springframework.org/schema/task
+       http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 
     <!--<context:property-placeholder location="classpath:application.properties" system-properties-mode="NEVER"/>-->
     <context:property-placeholder location="classpath:application.properties" system-properties-mode="OVERRIDE"/>
@@ -15,4 +18,33 @@
         <property name="name" value="许小群"></property>
         <property name="pwd" value="${JAVA_HOME}"></property>
     </bean>
+
+    <task:annotation-driven/>
+    <context:component-scan base-package="cn.xuqplus.task"/>
+    <bean id="demoTask" class="cn.xuqplus.task.DemoTask"></bean>
+
+    <!--
+    <task:scheduler id="demoTask_task"></task:scheduler>
+    <task:scheduled-tasks scheduler="demoTask_task">
+        <task:scheduled ref="demoTask" method="task" cron="*/5 * * * * ?"/>
+    </task:scheduled-tasks>
+    -->
+
+    <task:scheduler id="demoTask_task0"></task:scheduler>
+    <task:scheduled-tasks scheduler="demoTask_task0">
+        <task:scheduled ref="demoTask" method="task0" cron="*/1 * * * * ?"/>
+    </task:scheduled-tasks>
+
+    <bean id="demoTask0" class="cn.xuqplus.task.DemoTask">
+        <constructor-arg ref="taskExecutor"></constructor-arg>
+    </bean>
+    <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="1"></property>
+        <property name="maxPoolSize" value="6"></property>
+        <property name="queueCapacity" value="25"></property>
+    </bean>
+    <task:scheduler id="demoTask_print0" pool-size="1"></task:scheduler>
+    <task:scheduled-tasks scheduler="demoTask_print0">
+        <task:scheduled ref="demoTask0" method="printMessages" cron="*/1 * * * * ?"/>
+    </task:scheduled-tasks>
 </beans>
